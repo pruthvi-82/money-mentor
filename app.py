@@ -28,3 +28,24 @@ def analyze():
     })
 
 app.run(debug=True)
+from openai import OpenAI
+client = OpenAI(api_key="YOUR_API_KEY")
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_msg = data['message']
+    income = int(data.get('income', 0))
+    expenses = int(data.get('expenses', 0))
+
+    savings = income - expenses
+
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": f"User savings is ₹{savings}. Give financial advice."},
+            {"role": "user", "content": user_msg}
+        ]
+    )
+
+    return {"reply": response.choices[0].message.content}
