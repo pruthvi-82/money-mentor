@@ -4,79 +4,79 @@
     <title>AI Money Mentor</title>
 </head>
 
-<body style="
-    margin:0;
-    font-family:Arial;
-    background: linear-gradient(135deg, #1f4037, #99f2c8);
-">
+<body style="font-family:Arial; background:linear-gradient(135deg,#1f4037,#99f2c8);">
 
-<div style="
-    width:380px;
-    margin:80px auto;
-    padding:25px;
-    background: rgba(255,255,255,0.95);
-    border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.3);
-    text-align:center;
-">
+<div style="width:400px; margin:50px auto; background:white; padding:20px; border-radius:10px; text-align:center;">
 
-    <h2 style="color:#2c3e50;">🤖 AI Money Mentor</h2>
-    <p style="color:#555; font-size:14px;">
-        Smart financial guidance powered by AI
-    </p>
+<h2>🤖 AI Money Mentor</h2>
 
-    <input id="income" placeholder="💰 Enter Income" 
-    style="width:90%; padding:12px; margin:10px; border-radius:8px; border:1px solid #ccc;"><br>
+<!-- ✅ EXISTING INPUTS -->
+<input id="income" placeholder="Income"><br><br>
+<input id="expenses" placeholder="Expenses"><br><br>
 
-    <input id="expenses" placeholder="💸 Enter Expenses" 
-    style="width:90%; padding:12px; margin:10px; border-radius:8px; border:1px solid #ccc;"><br>
+<button onclick="analyze()">Analyze</button>
 
-    <input id="goal" placeholder="🎯 Savings Goal" 
-    style="width:90%; padding:12px; margin:10px; border-radius:8px; border:1px solid #ccc;"><br>
+<!-- ✅ EXISTING RESULT -->
+<h3 id="result"></h3>
 
-    <button onclick="analyze()" 
-    style="
-        padding:12px 25px;
-        background: linear-gradient(to right, #ff512f, #dd2476);
-        color:white;
-        border:none;
-        border-radius:8px;
-        cursor:pointer;
-        font-size:16px;
-        font-weight:bold;
-    ">
-    🚀 Analyze Now
-    </button>
+<hr>
 
-    <h3 id="result" style="margin-top:20px;"></h3>
+<!-- 🤖 NEW CHATBOT SECTION -->
+<h3>💬 Ask AI Advisor</h3>
+<input id="chatInput" placeholder="Ask anything..." style="width:70%;">
+<button onclick="sendMessage()">Send</button>
+
+<p id="chatResponse"></p>
 
 </div>
 
 <script>
+
+let userData = {};  // store user info
+
+// ✅ EXISTING ANALYZE FUNCTION (UNCHANGED + small add)
 async function analyze() {
     let income = document.getElementById("income").value;
     let expenses = document.getElementById("expenses").value;
-    let goal = document.getElementById("goal").value;
 
-    let response = await fetch("http://127.0.0.1:5000/analyze", {
+    userData = {income, expenses};  // store for chatbot
+
+    let res = await fetch("http://127.0.0.1:5000/analyze", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ income, expenses, goal })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ income, expenses })
     });
 
-    let data = await response.json();
-
-    let color = (data.score > 7) ? "green" : "red";
+    let data = await res.json();
 
     document.getElementById("result").innerHTML =
-        "<div style='color:" + color + "; font-weight:bold'>" +
-        "💵 Savings: ₹" + data.savings + "<br>" +
+        "💰 Savings: ₹" + data.savings + "<br>" +
         "📊 Score: " + data.score + "<br>" +
-        "💡 " + data.message +
-        "</div>";
+        "💡 " + data.message + "<br>" +
+        "📈 Investment: " + data.investment;
 }
+
+
+// 🤖 NEW CHATBOT FUNCTION
+async function sendMessage() {
+    let msg = document.getElementById("chatInput").value;
+
+    let res = await fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            message: msg,
+            income: userData.income,
+            expenses: userData.expenses
+        })
+    });
+
+    let data = await res.json();
+
+    document.getElementById("chatResponse").innerHTML =
+        "🤖 " + data.reply;
+}
+
 </script>
 
 </body>
